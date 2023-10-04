@@ -1,0 +1,30 @@
+# входной поток для uWSGI 
+upstream uwsgi_app {
+    server unix:/code/mystart.kz/uwsgi_app.sock; 
+}
+
+server {
+    listen 80;
+    server_name www.mystart.kz mystart.kz; 
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    ssl_certificate /code/mystart.kz/ssl/mystart.crt; 
+    ssl_certificate_key /code/mystart.kz/ssl/mystart.key;
+    server_name www.mystart.kz mystart.kz; 
+    error_log stderr warn;
+    access_log /dev/stdout main;
+
+    location / {
+        include      /etc/nginx/uwsgi_params;
+        uwsgi_pass   uwsgi_app;
+    }
+    location /static/ {
+        alias /code/mystart.kz/static/;
+    }
+
+    location /media/ {
+        alias /code/mystart.kz/media/; 
+    }
+}
